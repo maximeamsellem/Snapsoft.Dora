@@ -1,27 +1,49 @@
+using Snapsoft.Dora.Adapter.Postgres.Extensions;
+using Snapsoft.Dora.Domain.Extensions;
+using Snapsoft.Dora.WebApi;
+using Snapsoft.Dora.WebApi.HosterServices;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+var appConfiguration = AddConfiguration(builder);
+ConfigureServices(builder.Services, appConfiguration);
 
 var app = builder.Build();
+ConfigureHttpPipeline(app);
+app.Run();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+static void ConfigureServices(
+    IServiceCollection services, 
+    AppConfiguration appConfiguration)
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    services
+        .AddEndpointsApiExplorer()
+        .AddSwaggerGen()
+        .AddPostgresAdapter(appConfiguration.PostgresConnectionString)
+        .AddHostedService<DatabaseInitializerService>()
+        .AddDomainValidators()
+        .AddDomainConcreteCommandHandlers()
+        .AddControllers();
 }
 
-app.UseHttpsRedirection();
+static void ConfigureHttpPipeline(WebApplication app)
+{
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger().UseSwaggerUI();
+    }
 
-app.UseAuthorization();
+    app
+        .UseHttpsRedirection()
+        .UseAuthorization();
 
-app.MapControllers();
+    app.MapControllers();
+}
 
-app.Run();
+static AppConfiguration AddConfiguration(WebApplicationBuilder builder)
+{
+    return builder.Configuration
+        .Get<AppConfiguration>() ?? throw new Exception("Could not build AppConfiguration");
+}
 
 public partial class Program { }
