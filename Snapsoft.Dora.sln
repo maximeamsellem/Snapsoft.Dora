@@ -7,11 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Snapsoft.Dora.WebApi", "src
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Snapsoft.Dora.WebApi.Integration.Test", "src\Snapsoft.Dora.WebApi.Integration.Test\Snapsoft.Dora.WebApi.Integration.Test.csproj", "{0E983430-2671-48FA-A07D-DF3D2A0533B0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Snapsoft.Dora.Domain.Contracts", "Snapsoft.Dora.Domain.Contracts\Snapsoft.Dora.Domain.Contracts.csproj", "{87311143-CB64-4A81-A15B-25942B9D2A6D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Snapsoft.Dora.Domain.Contracts", "src\Snapsoft.Dora.Domain.Contracts\Snapsoft.Dora.Domain.Contracts.csproj", "{87311143-CB64-4A81-A15B-25942B9D2A6D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Snapsoft.Dora.Domain", "Snapsoft.Dora.Domain\Snapsoft.Dora.Domain.csproj", "{4E52F2CC-1F96-4873-A354-68529FB9DCC4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Snapsoft.Dora.Domain", "src\Snapsoft.Dora.Domain\Snapsoft.Dora.Domain.csproj", "{4E52F2CC-1F96-4873-A354-68529FB9DCC4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Snapsoft.Dora.Adapter.Postgres", "Snapsoft.Dora.Adapter.Postgres\Snapsoft.Dora.Adapter.Postgres.csproj", "{D69E1CE1-65D2-4EEE-B08A-00D53918CB6A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Snapsoft.Dora.Adapter.Postgres", "src\Snapsoft.Dora.Adapter.Postgres\Snapsoft.Dora.Adapter.Postgres.csproj", "{D69E1CE1-65D2-4EEE-B08A-00D53918CB6A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{068B13AB-D325-4B96-B150-F4E873570DFC}"
 	ProjectSection(SolutionItems) = preProject

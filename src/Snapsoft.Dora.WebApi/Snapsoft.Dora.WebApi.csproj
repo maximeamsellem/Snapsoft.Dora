@@ -17,9 +17,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Snapsoft.Dora.Adapter.Postgres\Snapsoft.Dora.Adapter.Postgres.csproj" />
-    <ProjectReference Include="..\..\Snapsoft.Dora.Domain.Contracts\Snapsoft.Dora.Domain.Contracts.csproj" />
-    <ProjectReference Include="..\..\Snapsoft.Dora.Domain\Snapsoft.Dora.Domain.csproj" />
+    <ProjectReference Include="..\Snapsoft.Dora.Adapter.Postgres\Snapsoft.Dora.Adapter.Postgres.csproj" />
+    <ProjectReference Include="..\Snapsoft.Dora.Domain.Contracts\Snapsoft.Dora.Domain.Contracts.csproj" />
+    <ProjectReference Include="..\Snapsoft.Dora.Domain\Snapsoft.Dora.Domain.csproj" />
   </ItemGroup>
 
 </Project>
