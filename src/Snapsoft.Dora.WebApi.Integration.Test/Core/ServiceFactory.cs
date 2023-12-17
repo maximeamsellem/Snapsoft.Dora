@@ -51,7 +51,7 @@ public class ServiceFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
         return new ContainerBuilder()
             .WithName(Guid.NewGuid().ToString("D"))
-            .WithImage("postgres:alpine3.19")
+            .WithImage("postgres:16-alpine3.19")
             .WithPortBinding(POSTGRES_HOST_PORT, POSTGRES_CONTAINER_PORT)
             .WithEnvironment("POSTGRES_PASSWORD", POSTGRES_PASSWORD)
             .WithWaitStrategy(Wait.ForUnixContainer()
