@@ -21,7 +21,7 @@ namespace Snapsoft.Dora.WebApi.Integration.Test
         {
             // Arrange
             var createHttpRequest = BuildComponentHttpRequest();
-            var command = BuildCreateComponentCommand();
+            var command = BuildCreateComponentCommand(GetRandomString(100));
 
             // Act
             var actual = await createHttpRequest.PostJsonAsync(command);
@@ -83,33 +83,19 @@ namespace Snapsoft.Dora.WebApi.Integration.Test
         [InlineData("1")]
         [InlineData("a1")]
         [InlineData("ab")]
-        public async Task CreateComponent_Returns_Unprocessable_When_Too_Short_Name(string name)
+        public async Task CreateComponent_Returns_Unprocessable_When_Name_Is_Less_Than_3_Character(string name)
         {
-            // Arrange
-            var createHttpRequest = BuildComponentHttpRequest();
-            var command = new CreateComponentCommand
-            {
-                Name = name
-            };
-
-            // Act                        
-            var actual = await createHttpRequest.PostJsonAsync(command);
-
-            // Assert
-            Assert.Equal(actual?.StatusCode, (int)HttpStatusCode.UnprocessableEntity);
-
-            var actualResponseDto = await actual!.GetJsonAsync<UnprocessableEntityResponseDto>();
-
-            Assert.NotNull(actualResponseDto?.PropertyErrors);
-            Assert.Contains(
-                nameof(CreateComponentCommand.Name),
-                actualResponseDto.PropertyErrors.Keys);
-
-            Assert.Equal(
-                $"'Name' must be between 3 and 100 characters. You entered {name.Length} characters.",
-                actualResponseDto.PropertyErrors[nameof(CreateComponentCommand.Name)].Single());
+            await CreateComponent_Returns_Unprocessable_When_Wrong_Name_Length(name);
         }
 
+        [Fact]
+        public async Task CreateComponent_Returns_Unprocessable_When_Name_Is_More_Than_100_Character()
+        {
+            var longName = GetRandomString(length: 101);
+
+            await CreateComponent_Returns_Unprocessable_When_Wrong_Name_Length(longName);
+        }
+        
         [Fact]
         public async Task GetComponent_Returns_Request_Component()
         {
@@ -139,12 +125,41 @@ namespace Snapsoft.Dora.WebApi.Integration.Test
             // Assert
             Assert.Equal((int)HttpStatusCode.NotFound, actual?.StatusCode);
         }
-                
-        private static CreateComponentCommand BuildCreateComponentCommand()
+
+        private async Task CreateComponent_Returns_Unprocessable_When_Wrong_Name_Length(string name)
+        {
+            // Arrange
+            var createHttpRequest = BuildComponentHttpRequest();
+            var command = new CreateComponentCommand
+            {
+                Name = name
+            };
+
+            // Act                        
+            var actual = await createHttpRequest.PostJsonAsync(command);
+
+            // Assert
+            Assert.Equal(actual?.StatusCode, (int)HttpStatusCode.UnprocessableEntity);
+
+            var actualResponseDto = await actual!.GetJsonAsync<UnprocessableEntityResponseDto>();
+
+            Assert.NotNull(actualResponseDto?.PropertyErrors);
+            Assert.Contains(
+                nameof(CreateComponentCommand.Name),
+                actualResponseDto.PropertyErrors.Keys);
+
+            Assert.Equal(
+                $"'Name' must be between 3 and 100 characters. You entered {name.Length} characters.",
+                actualResponseDto.PropertyErrors[nameof(CreateComponentCommand.Name)].Single());
+        }
+
+        private static CreateComponentCommand BuildCreateComponentCommand() => BuildCreateComponentCommand(Guid.NewGuid().ToString());
+
+        private static CreateComponentCommand BuildCreateComponentCommand(string name)
         {
             return new CreateComponentCommand
             {
-                Name = Guid.NewGuid().ToString(),
+                Name = name,
             };
         }
 
@@ -176,6 +191,11 @@ namespace Snapsoft.Dora.WebApi.Integration.Test
             return new FlurlClient(_factory.CreateClient())
                 .Request("Component")
                 .AllowAnyHttpStatus();
+        }
+
+        private static string GetRandomString(int length)
+        {
+            return string.Join("", Enumerable.Repeat(0, length).Select(n => (char)new Random().Next(65, 122)));
         }
     }
 }
