@@ -12,7 +12,7 @@ internal class DoraDbContext : DbContext
 
     public DoraDbContext() : base() { }
 
-    public DbSet<Component> Components { get; set; }
+    public required DbSet<Component> Components { get; init; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
