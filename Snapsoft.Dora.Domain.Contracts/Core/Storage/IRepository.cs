@@ -1,4 +1,6 @@
-﻿namespace Snapsoft.Dora.Domain.Contracts.Core.Storage;
+﻿using System.Linq.Expressions;
+
+namespace Snapsoft.Dora.Domain.Contracts.Core.Storage;
 
 public interface IRepository<TEntity> where TEntity : IEntity, new()
 {
@@ -7,4 +9,6 @@ public interface IRepository<TEntity> where TEntity : IEntity, new()
     Task AddAsync(TEntity entity);
 
     Task<TEntity?> GetByIdAsync(long id);
+
+    Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate);
 }

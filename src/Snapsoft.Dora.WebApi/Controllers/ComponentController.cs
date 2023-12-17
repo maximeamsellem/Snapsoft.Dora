@@ -32,19 +32,13 @@ namespace Snapsoft.Dora.Controllers
 
             return result switch
             {
-                SuccessCommandResult s => Created(string.Empty,
-                    new SuccessResponseDto<Component>
-                {
-                    Data = s.Value as Component
-                }),
-                UnprocessableCommandResult u => UnprocessableEntity(new UnprocessableEntityResponseDto
-                {
-                    PropertyErrors = u.PropertyErrors,
-                }),
-                _ => Problem()
+                SuccessCommandResult s => base.Created(string.Empty, ToSuccessResponseDto(s)),
+                UnprocessableCommandResult u when u.HasUnicityError => base.Conflict(ToUnprocessableEntityResponseDto(u)),
+                UnprocessableCommandResult u when !u.HasUnicityError => base.UnprocessableEntity(ToUnprocessableEntityResponseDto(u)),
+                _ => base.Problem()
             };
         }
-
+                
         [HttpGet("{id:long}", Name = "GetComponentById")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SuccessResponseDto<ComponentDto>))]
@@ -64,6 +58,22 @@ namespace Snapsoft.Dora.Controllers
                     Name = component.Name
                 }
             });
+        }
+
+        private static SuccessResponseDto<Component> ToSuccessResponseDto(SuccessCommandResult s)
+        {
+            return new SuccessResponseDto<Component>
+            {
+                Data = s.Value as Component
+            };
+        }
+
+        private static UnprocessableEntityResponseDto ToUnprocessableEntityResponseDto(UnprocessableCommandResult u)
+        {
+            return new UnprocessableEntityResponseDto
+            {
+                PropertyErrors = u.PropertyErrors,
+            };
         }
     }
 }

@@ -3,6 +3,7 @@ using Snapsoft.Dora.Domain.Contracts.Commands;
 using Snapsoft.Dora.Domain.Contracts.Core.Commands;
 using Snapsoft.Dora.Domain.Contracts.Core.Storage;
 using Snapsoft.Dora.Domain.Contracts.Entities;
+using Snapsoft.Dora.Domain.Extensions;
 
 namespace Snapsoft.Dora.Domain.CommandsHandlers;
 
@@ -21,13 +22,13 @@ public class CreateComponentCommandHandler : ICommandHandler<CreateComponentComm
 
     public async Task<ICommandResult> HandleAsync(CreateComponentCommand command)
     {
-        var validationResult = _validator.Validate(command);
+        var validationResult = await _validator.ValidateAsync(command);
 
         if(!validationResult.IsValid)
         {
-            return BuildUnprocessableCommandResult(validationResult);
+            return validationResult.ToErrorCommandResult();
         }
-
+                
         var component = new Component
         {
             Name = command.Name,
@@ -38,16 +39,5 @@ public class CreateComponentCommandHandler : ICommandHandler<CreateComponentComm
         await _repository.SaveAsync();
 
         return new SuccessCommandResult(component);
-    }
-
-    private static ICommandResult BuildUnprocessableCommandResult(FluentValidation.Results.ValidationResult validationResult)
-    {
-        return new UnprocessableCommandResult
-        {
-            PropertyErrors = validationResult
-                .Errors
-                .GroupBy(e => e.PropertyName)
-                .ToDictionary(e => e.Key, e => e.Select(e => e.ErrorMessage))
-        };
     }
 }

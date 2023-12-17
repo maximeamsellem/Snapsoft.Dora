@@ -3,7 +3,6 @@ using Snapsoft.Dora.Domain.Contracts.Commands;
 using Snapsoft.Dora.WebApi.Dtos;
 using Snapsoft.Dora.WebApi.Integration.Test.Core;
 using System.Net;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Snapsoft.Dora.WebApi.Integration.Test
 {
@@ -28,11 +27,11 @@ namespace Snapsoft.Dora.WebApi.Integration.Test
             var actual = await createHttpRequest.PostJsonAsync(command);
             
             // Assert
-            Assert.Equal(actual?.StatusCode, (int)HttpStatusCode.Created);
+            Assert.Equal((int)HttpStatusCode.Created, actual?.StatusCode);
 
-            var body = await actual!.GetJsonAsync<SuccessResponseDto<ComponentDto>>();
-            Assert.Equal(body.Data?.Name, command.Name);
-            Assert.True(body.Data?.Id > 0);
+            var actualResponseDto = await actual!.GetJsonAsync<SuccessResponseDto<ComponentDto>>();
+            Assert.Equal(command.Name, actualResponseDto.Data?.Name);
+            Assert.True(actualResponseDto.Data?.Id > 0);
         }
 
         [Fact]
@@ -51,6 +50,24 @@ namespace Snapsoft.Dora.WebApi.Integration.Test
         }
 
         [Fact]
+        public async Task CreateComponent_Handles_Duplicate_Name()
+        {
+            // Arrange
+            var createHttpRequest = BuildComponentHttpRequest();
+            var command = BuildCreateComponentCommand();
+            
+            await CreateComponentWithChecks(command);
+
+            command = command with { Name = command.Name.ToLower() };
+
+            // Act                        
+            var actual = await createHttpRequest.PostJsonAsync(command);
+
+            // Assert
+            Assert.Equal(actual?.StatusCode, (int)HttpStatusCode.Conflict);
+        }
+
+        [Fact]
         public async Task GetComponent_Returns_Request_Component()
         {
             // Arrange
@@ -66,7 +83,7 @@ namespace Snapsoft.Dora.WebApi.Integration.Test
             Assert.Equal(actual?.StatusCode, (int)HttpStatusCode.OK);
 
             var actualComponent = await actual!.GetJsonAsync<SuccessResponseDto<ComponentDto>>();
-            Assert.Equal(createdComponent.Name, command.Name);            
+            Assert.Equal(command.Name, createdComponent.Name);
             Assert.Equal(createdComponent.Id, actualComponent?.Data?.Id);
         }
 
@@ -77,7 +94,7 @@ namespace Snapsoft.Dora.WebApi.Integration.Test
             var actual = await GetComponent(Random.Shared.NextInt64());
 
             // Assert
-            Assert.Equal(actual?.StatusCode, (int)HttpStatusCode.NotFound);
+            Assert.Equal((int)HttpStatusCode.NotFound, actual?.StatusCode);
         }
                 
         private static CreateComponentCommand BuildCreateComponentCommand()

@@ -3,19 +3,31 @@ using Snapsoft.Dora.Domain.Extensions;
 using Snapsoft.Dora.WebApi;
 using Snapsoft.Dora.WebApi.HosterServices;
 
-var builder = WebApplication.CreateBuilder(args);
+var host = Host.CreateDefaultBuilder(args);
 
-var appConfiguration = AddConfiguration(builder);
-ConfigureServices(builder.Services, appConfiguration);
+host
+    .ConfigureWebHostDefaults(x =>
+    {
+        x.ConfigureServices(ConfigureServices);
+        x.Configure(ConfigureHttpPipeline);
+    });
 
-var app = builder.Build();
-ConfigureHttpPipeline(app);
-app.Run();
+var app = host.Build();
+
+using (app)
+{
+    await app.StartAsync();
+    await app.WaitForShutdownAsync();
+}
 
 static void ConfigureServices(
-    IServiceCollection services, 
-    AppConfiguration appConfiguration)
+    WebHostBuilderContext webHostBuilderContext,
+    IServiceCollection services)
 {
+    var appConfiguration = webHostBuilderContext
+        .Configuration
+        .Get<AppConfiguration>() ?? throw new Exception("Could not build AppConfiguration");
+
     services
         .AddEndpointsApiExplorer()
         .AddSwaggerGen()
@@ -26,9 +38,13 @@ static void ConfigureServices(
         .AddControllers();
 }
 
-static void ConfigureHttpPipeline(WebApplication app)
+static void ConfigureHttpPipeline(
+    WebHostBuilderContext webHostBuilderContext,
+    IApplicationBuilder app)
 {
-    if (app.Environment.IsDevelopment())
+    app.UseRouting();
+
+    if (webHostBuilderContext.HostingEnvironment.IsDevelopment())
     {
         app.UseSwagger().UseSwaggerUI();
     }
@@ -37,13 +53,7 @@ static void ConfigureHttpPipeline(WebApplication app)
         .UseHttpsRedirection()
         .UseAuthorization();
 
-    app.MapControllers();
-}
-
-static AppConfiguration AddConfiguration(WebApplicationBuilder builder)
-{
-    return builder.Configuration
-        .Get<AppConfiguration>() ?? throw new Exception("Could not build AppConfiguration");
+    app.UseEndpoints(endpoints => endpoints.MapControllers());
 }
 
 public partial class Program { }

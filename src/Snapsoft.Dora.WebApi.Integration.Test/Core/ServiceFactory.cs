@@ -1,5 +1,4 @@
-﻿using Docker.DotNet.Models;
-using DotNet.Testcontainers.Builders;
+﻿using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -14,6 +13,9 @@ public class ServiceFactory : WebApplicationFactory<Program>, IAsyncLifetime
     private const string POSTGRES_PASSWORD = "postgres123456";
     private const int POSTGRES_HOST_PORT = 7000;
 
+    private readonly static string DORA_DB_CONNECTION_STRING =
+        $"Host=localhost;Database=doratest;Username=postgres;Password={POSTGRES_PASSWORD};Port={POSTGRES_HOST_PORT}";
+
     private readonly static string POSTGRES_CONNECTION_STRING =
         $"Host=localhost;Database=postgres;Username=postgres;Password={POSTGRES_PASSWORD};Port={POSTGRES_HOST_PORT}";
 
@@ -26,11 +28,13 @@ public class ServiceFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {
         builder.ConfigureAppConfiguration((webBuilder, configBuilder) =>
         {
+            configBuilder.Sources.Clear();
+
             configBuilder.AddInMemoryCollection(new List<KeyValuePair<string, string?>>
             {
                 new KeyValuePair<string, string?>(
                     "PostgresConnectionString" ,
-                    POSTGRES_CONNECTION_STRING)
+                    DORA_DB_CONNECTION_STRING)
             });
         });
     }
