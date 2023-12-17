@@ -65,6 +65,17 @@ namespace Snapsoft.Dora.WebApi.Integration.Test
 
             // Assert
             Assert.Equal(actual?.StatusCode, (int)HttpStatusCode.Conflict);
+
+            var actualResponseDto = await actual!.GetJsonAsync<UnprocessableEntityResponseDto>();
+
+            Assert.NotNull(actualResponseDto?.PropertyErrors);
+            Assert.Contains(
+                nameof(CreateComponentCommand.Name),
+                actualResponseDto.PropertyErrors.Keys);
+
+            Assert.Equal(
+                $"Name '{command.Name}' is already used",
+                actualResponseDto.PropertyErrors[nameof(CreateComponentCommand.Name)].Single());
         }
 
         [Fact]
