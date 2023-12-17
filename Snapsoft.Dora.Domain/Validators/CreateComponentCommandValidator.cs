@@ -18,7 +18,7 @@ internal class CreateComponentCommandValidator : AbstractValidator<CreateCompone
 
                 return !nameAlreadyUsed;
             })
-            .WithMessage(cmd => $"{nameof(CreateComponentCommand.Name)} '{cmd.Name}' is already used")
+            .WithMessage(cmd => $"'{nameof(CreateComponentCommand.Name)}' '{cmd.Name}' is already used")
             .WithErrorCode(Constants.VALIDATION_UNICITY_ERROR);
     }
 }

@@ -50,7 +50,7 @@ namespace Snapsoft.Dora.WebApi.Integration.Test
         }
 
         [Fact]
-        public async Task CreateComponent_Handles_Duplicate_Name()
+        public async Task CreateComponent_Returns_Conflict_When_Duplicate_Name()
         {
             // Arrange
             var createHttpRequest = BuildComponentHttpRequest();
@@ -74,7 +74,39 @@ namespace Snapsoft.Dora.WebApi.Integration.Test
                 actualResponseDto.PropertyErrors.Keys);
 
             Assert.Equal(
-                $"Name '{command.Name}' is already used",
+                $"'Name' '{command.Name}' is already used",
+                actualResponseDto.PropertyErrors[nameof(CreateComponentCommand.Name)].Single());
+        }
+
+        [Theory]
+        [InlineData("a")]
+        [InlineData("1")]
+        [InlineData("a1")]
+        [InlineData("ab")]
+        public async Task CreateComponent_Returns_Unprocessable_When_Too_Short_Name(string name)
+        {
+            // Arrange
+            var createHttpRequest = BuildComponentHttpRequest();
+            var command = new CreateComponentCommand
+            {
+                Name = name
+            };
+
+            // Act                        
+            var actual = await createHttpRequest.PostJsonAsync(command);
+
+            // Assert
+            Assert.Equal(actual?.StatusCode, (int)HttpStatusCode.UnprocessableEntity);
+
+            var actualResponseDto = await actual!.GetJsonAsync<UnprocessableEntityResponseDto>();
+
+            Assert.NotNull(actualResponseDto?.PropertyErrors);
+            Assert.Contains(
+                nameof(CreateComponentCommand.Name),
+                actualResponseDto.PropertyErrors.Keys);
+
+            Assert.Equal(
+                $"'Name' must be between 3 and 100 characters. You entered {name.Length} characters.",
                 actualResponseDto.PropertyErrors[nameof(CreateComponentCommand.Name)].Single());
         }
 
