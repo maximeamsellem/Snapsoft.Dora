@@ -14,10 +14,20 @@ internal class DoraDbContext : DbContext
 
     public required DbSet<Component> Components { get; init; }
 
+    public required DbSet<ComponentDeployment> ComponentDeployments { get; init; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        new ComponentEntityTypeConfiguration().Configure(modelBuilder.Entity<Component>());
-    }
+        Configure<ComponentEntityTypeConfiguration, Component>();
+        Configure<ComponentDeploymentEntityTypeConfiguration, ComponentDeployment>();
+
+        void Configure<TEntityConfiguration, TEntity>()
+            where TEntity : class, new()
+            where TEntityConfiguration : IEntityTypeConfiguration<TEntity>, new()
+        {
+            new TEntityConfiguration().Configure(modelBuilder.Entity<TEntity>());
+        }
+    }    
 }

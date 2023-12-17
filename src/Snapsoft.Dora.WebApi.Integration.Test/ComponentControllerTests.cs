@@ -1,7 +1,8 @@
-using Flurl.Http;
 using Snapsoft.Dora.Domain.Contracts.Commands;
 using Snapsoft.Dora.WebApi.Dtos;
+using Snapsoft.Dora.WebApi.Integration.Test.CommandBuilders;
 using Snapsoft.Dora.WebApi.Integration.Test.Core;
+using Snapsoft.Dora.WebApi.Integration.Test.HttpRequestBuilders;
 using System.Net;
 
 namespace Snapsoft.Dora.WebApi.Integration.Test
@@ -9,22 +10,24 @@ namespace Snapsoft.Dora.WebApi.Integration.Test
     [Collection(nameof(ServiceFactory))]
     public class ComponentControllerTests
     {
-        private readonly ServiceFactory _factory;
+        private readonly ComponentRequestExecutor _sutRequestExecutor;
 
         public ComponentControllerTests(ServiceFactory factory)
         {
-            _factory = factory;
+            _sutRequestExecutor = new ComponentRequestExecutor(factory);
         }
 
         [Fact]
         public async Task CreateComponent_Returns_Ok()
         {
             // Arrange
-            var createHttpRequest = BuildComponentHttpRequest();
-            var command = BuildCreateComponentCommand(GetRandomString(100));
+            var command = DefaultComponentCommands.Create with 
+            { 
+                Name = Generator.RandomString(length: 100),
+            };
 
             // Act
-            var actual = await createHttpRequest.PostJsonAsync(command);
+            var actual = await _sutRequestExecutor.CreateComponentAsync(command);
             
             // Assert
             Assert.Equal((int)HttpStatusCode.Created, actual?.StatusCode);
@@ -37,13 +40,12 @@ namespace Snapsoft.Dora.WebApi.Integration.Test
         [Fact]
         public async Task CreateComponent_Returns_Always_Increment_Id()
         {
-            // Arrange
-            var command1 = BuildCreateComponentCommand();
-            var command2 = BuildCreateComponentCommand();
-
             // Act            
-            var createdComponent1 = await CreateComponentWithChecks(command1);
-            var createdComponent2 = await CreateComponentWithChecks(command2);
+            var createdComponent1 = await _sutRequestExecutor
+                .CreateComponentWithChecksAsync(DefaultComponentCommands.Create);
+
+            var createdComponent2 = await _sutRequestExecutor
+                .CreateComponentWithChecksAsync(DefaultComponentCommands.Create);
 
             // Assert
             Assert.True(createdComponent1.Id < createdComponent2.Id);
@@ -53,15 +55,14 @@ namespace Snapsoft.Dora.WebApi.Integration.Test
         public async Task CreateComponent_Returns_Conflict_When_Duplicate_Name()
         {
             // Arrange
-            var createHttpRequest = BuildComponentHttpRequest();
-            var command = BuildCreateComponentCommand();
-            
-            await CreateComponentWithChecks(command);
+            var command = DefaultComponentCommands.Create;
+
+            await _sutRequestExecutor.CreateComponentWithChecksAsync(command);
 
             command = command with { Name = command.Name.ToLower() };
 
             // Act                        
-            var actual = await createHttpRequest.PostJsonAsync(command);
+            var actual = await _sutRequestExecutor.CreateComponentAsync(command);
 
             // Assert
             Assert.Equal(actual?.StatusCode, (int)HttpStatusCode.Conflict);
@@ -69,13 +70,11 @@ namespace Snapsoft.Dora.WebApi.Integration.Test
             var actualResponseDto = await actual!.GetJsonAsync<UnprocessableEntityResponseDto>();
 
             Assert.NotNull(actualResponseDto?.PropertyErrors);
-            Assert.Contains(
-                nameof(CreateComponentCommand.Name),
-                actualResponseDto.PropertyErrors.Keys);
+            Assert.Contains("Name", actualResponseDto.PropertyErrors.Keys);
 
             Assert.Equal(
                 $"'Name' '{command.Name}' is already used",
-                actualResponseDto.PropertyErrors[nameof(CreateComponentCommand.Name)].Single());
+                actualResponseDto.PropertyErrors["Name"].Single());
         }
 
         [Theory]
@@ -91,7 +90,7 @@ namespace Snapsoft.Dora.WebApi.Integration.Test
         [Fact]
         public async Task CreateComponent_Returns_Unprocessable_When_Name_Is_More_Than_100_Character()
         {
-            var longName = GetRandomString(length: 101);
+            var longName = Generator.RandomString(length: 101);
 
             await CreateComponent_Returns_Unprocessable_When_Wrong_Name_Length(longName);
         }
@@ -100,13 +99,11 @@ namespace Snapsoft.Dora.WebApi.Integration.Test
         public async Task GetComponent_Returns_Request_Component()
         {
             // Arrange
-            var command = BuildCreateComponentCommand();
-            var createdComponent = await CreateComponentWithChecks(command);
+            var command = DefaultComponentCommands.Create;
+            var createdComponent = await _sutRequestExecutor.CreateComponentWithChecksAsync(command);
 
             // Act
-            var actual = await BuildComponentHttpRequest()
-                .AppendPathSegment(createdComponent.Id)
-                .GetAsync();
+            var actual = await _sutRequestExecutor.GetComponentAsync(createdComponent.Id);
 
             // Assert
             Assert.Equal(actual?.StatusCode, (int)HttpStatusCode.OK);
@@ -120,7 +117,7 @@ namespace Snapsoft.Dora.WebApi.Integration.Test
         public async Task GetComponent_Returns_Not_Found_When_Component_Does_Not_Exists()
         {
             // Act
-            var actual = await GetComponent(Random.Shared.NextInt64());
+            var actual = await _sutRequestExecutor.GetComponentAsync(Random.Shared.NextInt64());
 
             // Assert
             Assert.Equal((int)HttpStatusCode.NotFound, actual?.StatusCode);
@@ -128,15 +125,11 @@ namespace Snapsoft.Dora.WebApi.Integration.Test
 
         private async Task CreateComponent_Returns_Unprocessable_When_Wrong_Name_Length(string name)
         {
-            // Arrange
-            var createHttpRequest = BuildComponentHttpRequest();
-            var command = new CreateComponentCommand
-            {
-                Name = name
-            };
+            // Arrange            
+            var command = DefaultComponentCommands.Create with { Name = name};
 
             // Act                        
-            var actual = await createHttpRequest.PostJsonAsync(command);
+            var actual = await _sutRequestExecutor.CreateComponentAsync(command);
 
             // Assert
             Assert.Equal(actual?.StatusCode, (int)HttpStatusCode.UnprocessableEntity);
@@ -151,51 +144,6 @@ namespace Snapsoft.Dora.WebApi.Integration.Test
             Assert.Equal(
                 $"'Name' must be between 3 and 100 characters. You entered {name.Length} characters.",
                 actualResponseDto.PropertyErrors[nameof(CreateComponentCommand.Name)].Single());
-        }
-
-        private static CreateComponentCommand BuildCreateComponentCommand() => BuildCreateComponentCommand(Guid.NewGuid().ToString());
-
-        private static CreateComponentCommand BuildCreateComponentCommand(string name)
-        {
-            return new CreateComponentCommand
-            {
-                Name = name,
-            };
-        }
-
-        private async Task<ComponentDto> CreateComponentWithChecks(CreateComponentCommand createComponentCommand)
-        {
-            var createHttpRequest = BuildComponentHttpRequest();
-            var createResponse = await createHttpRequest.PostJsonAsync(createComponentCommand);
-
-            Assert.Equal(createResponse?.StatusCode, (int)HttpStatusCode.Created);
-            
-            var successDto = await createResponse!
-                .GetJsonAsync<SuccessResponseDto<ComponentDto>>();
-
-            Assert.NotNull(successDto?.Data);
-
-            return successDto.Data;
-
-        }
-
-        private async Task<IFlurlResponse> GetComponent(long componentId)
-        {
-            return await BuildComponentHttpRequest()
-                .AppendPathSegment(componentId)
-                .GetAsync();
-        }
-
-        private IFlurlRequest BuildComponentHttpRequest()
-        {
-            return new FlurlClient(_factory.CreateClient())
-                .Request("Component")
-                .AllowAnyHttpStatus();
-        }
-
-        private static string GetRandomString(int length)
-        {
-            return string.Join("", Enumerable.Repeat(0, length).Select(n => (char)new Random().Next(65, 122)));
-        }
+        }        
     }
 }

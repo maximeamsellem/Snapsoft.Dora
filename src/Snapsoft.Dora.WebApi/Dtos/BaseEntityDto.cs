@@ -2,5 +2,5 @@
 
 public record BaseEntityDto
 {
-    public long Id { get; init; }
+    public required long Id { get; init; }
 }

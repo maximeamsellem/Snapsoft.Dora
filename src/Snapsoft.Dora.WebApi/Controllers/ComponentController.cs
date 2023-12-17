@@ -19,7 +19,7 @@ namespace Snapsoft.Dora.Controllers
             _serviceProvider = serviceProvider;
         }
 
-        [HttpPost(Name = "CreateComponent")]
+        [HttpPost(Name = nameof(CreateComponent))]
         [Consumes("application/json")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SuccessResponseDto<ComponentDto>))]
@@ -32,14 +32,14 @@ namespace Snapsoft.Dora.Controllers
 
             return result switch
             {
-                SuccessCommandResult s => base.Created(string.Empty, ToSuccessResponseDto(s)),
+                SuccessCommandResult s => base.Created(string.Empty, ToSuccessResponseDto((Component)s.Value)),
                 UnprocessableCommandResult u when u.HasUnicityError => base.Conflict(ToUnprocessableEntityResponseDto(u)),
                 UnprocessableCommandResult u when !u.HasUnicityError => base.UnprocessableEntity(ToUnprocessableEntityResponseDto(u)),
                 _ => base.Problem()
             };
         }
                 
-        [HttpGet("{id:long}", Name = "GetComponentById")]
+        [HttpGet("{id:long}", Name = nameof(GetComponentById))]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SuccessResponseDto<ComponentDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(UnprocessableEntityResponseDto))]
@@ -50,21 +50,18 @@ namespace Snapsoft.Dora.Controllers
 
             if(component == null) return NotFound();
 
-            return Ok(new SuccessResponseDto<ComponentDto>
-            {
-                Data = new ComponentDto
-                {
-                    Id = component.Id,
-                    Name = component.Name
-                }
-            });
+            return Ok(ToSuccessResponseDto(component));
         }
 
-        private static SuccessResponseDto<Component> ToSuccessResponseDto(SuccessCommandResult s)
+        private static SuccessResponseDto<ComponentDto> ToSuccessResponseDto(Component component)
         {
-            return new SuccessResponseDto<Component>
+            return new SuccessResponseDto<ComponentDto>
             {
-                Data = s.Value as Component
+                Data = new ComponentDto
+                { 
+                    Id = component.Id,
+                    Name = component.Name,
+                }
             };
         }
 

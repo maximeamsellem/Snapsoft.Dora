@@ -2,5 +2,5 @@
 
 public record ComponentDto : BaseEntityDto
 {
-    public string Name { get; init; } = string.Empty;
+    public required string Name { get; init; }
 }

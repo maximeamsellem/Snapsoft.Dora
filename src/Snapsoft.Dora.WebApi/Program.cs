@@ -34,8 +34,14 @@ static void ConfigureServices(
         .AddPostgresAdapter(appConfiguration.PostgresConnectionString)
         .AddHostedService<DatabaseInitializerService>()
         .AddDomainValidators()
-        .AddDomainConcreteCommandHandlers()
-        .AddControllers();
+        .AddDomainConcreteCommandHandlers();
+
+    services
+        .AddControllers()
+        .AddJsonOptions(jsonOption =>
+        {
+            jsonOption.JsonSerializerOptions.WriteIndented = !webHostBuilderContext.HostingEnvironment.IsProduction();
+        });
 }
 
 static void ConfigureHttpPipeline(
