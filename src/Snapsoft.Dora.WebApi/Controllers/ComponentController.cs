@@ -4,6 +4,7 @@ using Snapsoft.Dora.Domain.Contracts.Commands;
 using Snapsoft.Dora.Domain.Contracts.Core.Commands;
 using Snapsoft.Dora.Domain.Contracts.Core.Storage;
 using Snapsoft.Dora.Domain.Contracts.Entities;
+using Snapsoft.Dora.WebApi;
 using Snapsoft.Dora.WebApi.Dtos;
 
 namespace Snapsoft.Dora.Controllers
@@ -29,14 +30,7 @@ namespace Snapsoft.Dora.Controllers
         {
             var handler = _serviceProvider.GetRequiredService<CreateComponentCommandHandler>();
             var result = await handler.HandleAsync(createComponentCommand);
-
-            return result switch
-            {
-                SuccessCommandResult s => base.Created(string.Empty, ToSuccessResponseDto((Component)s.Value)),
-                UnprocessableCommandResult u when u.HasUnicityError => base.Conflict(ToUnprocessableEntityResponseDto(u)),
-                UnprocessableCommandResult u when !u.HasUnicityError => base.UnprocessableEntity(ToUnprocessableEntityResponseDto(u)),
-                _ => base.Problem()
-            };
+            return result.ToActionResult(successResult => ToComponentDto((Component)successResult.Value));            
         }
                 
         [HttpGet("{id:long}", Name = nameof(GetComponentById))]
@@ -50,27 +44,14 @@ namespace Snapsoft.Dora.Controllers
 
             if(component == null) return NotFound();
 
-            return Ok(ToSuccessResponseDto(component));
+            var dto = ToComponentDto(component);
+            return Ok(dto.ToSuccessResponseDto());
         }
 
-        private static SuccessResponseDto<ComponentDto> ToSuccessResponseDto(Component component)
+        private static ComponentDto ToComponentDto(Component component) => new ComponentDto
         {
-            return new SuccessResponseDto<ComponentDto>
-            {
-                Data = new ComponentDto
-                { 
-                    Id = component.Id,
-                    Name = component.Name,
-                }
-            };
-        }
-
-        private static UnprocessableEntityResponseDto ToUnprocessableEntityResponseDto(UnprocessableCommandResult u)
-        {
-            return new UnprocessableEntityResponseDto
-            {
-                PropertyErrors = u.PropertyErrors,
-            };
-        }
+            Id = component.Id,
+            Name = component.Name,
+        };
     }
 }

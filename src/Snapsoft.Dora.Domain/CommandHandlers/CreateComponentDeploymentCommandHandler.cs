@@ -40,6 +40,6 @@ public class CreateComponentDeploymentCommandHandler : ICommandHandler<CreateCom
 
         await _repository.SaveAsync();
 
-        return new SuccessCommandResult(componentDeployment);
+        return new CreationSuccessCommandResult(componentDeployment);
     }
 }
