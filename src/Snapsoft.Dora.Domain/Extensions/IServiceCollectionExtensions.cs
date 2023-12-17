@@ -10,6 +10,7 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddDomainValidators(this IServiceCollection services)
     {
         return services
+            .AddScoped<IValidator<CreateComponentDeploymentCommand>, CreateComponentDeploymentCommandValidator>()
             .AddScoped<IValidator<CreateComponentCommand>, CreateComponentCommandValidator>();
     }
 }

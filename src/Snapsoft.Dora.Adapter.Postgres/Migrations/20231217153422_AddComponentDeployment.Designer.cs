@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Snapsoft.Dora.Adapter.Postgres;
@@ -11,9 +12,11 @@ using Snapsoft.Dora.Adapter.Postgres;
 namespace Snapsoft.Dora.Adapter.Postgres.Migrations
 {
     [DbContext(typeof(DoraDbContext))]
-    partial class DoraDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231217153422_AddComponentDeployment")]
+    partial class AddComponentDeployment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -7,6 +7,8 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddDomainConcreteCommandHandlers(
         this IServiceCollection services)
     {
-        return services.AddScoped<CreateComponentCommandHandler>();
+        return services
+            .AddScoped<CreateComponentDeploymentCommandHandler>()
+            .AddScoped<CreateComponentCommandHandler>();
     }
 }
