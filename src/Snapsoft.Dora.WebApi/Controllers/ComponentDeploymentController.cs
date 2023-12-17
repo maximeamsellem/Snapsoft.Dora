@@ -4,6 +4,7 @@ using Snapsoft.Dora.Domain.Contracts.Commands;
 using Snapsoft.Dora.Domain.Contracts.Core.Commands;
 using Snapsoft.Dora.Domain.Contracts.Entities;
 using Snapsoft.Dora.Domain.Read.Contracts.Repositories;
+using Snapsoft.Dora.WebApi;
 using Snapsoft.Dora.WebApi.Dtos;
 
 namespace Snapsoft.Dora.Controllers
@@ -30,13 +31,7 @@ namespace Snapsoft.Dora.Controllers
             var handler = _serviceProvider.GetRequiredService<CreateComponentDeploymentCommandHandler>();
             var result = await handler.HandleAsync(command);
 
-            return result switch
-            {
-                SuccessCommandResult s => base.Created(string.Empty, ToSuccessResponseDto((ComponentDeployment)s.Value)),
-                UnprocessableCommandResult u when u.HasUnicityError => base.Conflict(ToUnprocessableEntityResponseDto(u)),
-                UnprocessableCommandResult u when !u.HasUnicityError => base.UnprocessableEntity(ToUnprocessableEntityResponseDto(u)),
-                _ => base.Problem()
-            };
+            return result.ToActionResult(successResult => ToComponentDeploymentDto((ComponentDeployment)successResult.Value));
         }
                 
         [HttpGet("{id:long}", Name = nameof(GetComponentDeploymentById))]
@@ -50,30 +45,20 @@ namespace Snapsoft.Dora.Controllers
 
             if(componentDeployment == null) return NotFound();
 
-            return Ok(ToSuccessResponseDto(componentDeployment));
+            var dto = ToComponentDeploymentDto(componentDeployment);
+            return Ok(dto.ToSuccessResponseDto());
         }
 
-        private static SuccessResponseDto<ComponentDeploymentDto> ToSuccessResponseDto(
+        private static ComponentDeploymentDto ToComponentDeploymentDto(
             ComponentDeployment componentDeployment)
         {
-            return new SuccessResponseDto<ComponentDeploymentDto>
+            return new ComponentDeploymentDto
             {
-                Data = new ComponentDeploymentDto
-                {
-                    Id = componentDeployment.Id,
-                    CommitId = componentDeployment.CommitId,
-                    ComponentId = componentDeployment.ComponentId,
-                    ComponentName = componentDeployment.Component?.Name ?? string.Empty,
-                    Version = componentDeployment.Version,
-                }
-            };
-        }
-
-        private static UnprocessableEntityResponseDto ToUnprocessableEntityResponseDto(UnprocessableCommandResult u)
-        {
-            return new UnprocessableEntityResponseDto
-            {
-                PropertyErrors = u.PropertyErrors,
+                Id = componentDeployment.Id,
+                CommitId = componentDeployment.CommitId,
+                ComponentId = componentDeployment.ComponentId,
+                ComponentName = componentDeployment.Component?.Name ?? string.Empty,
+                Version = componentDeployment.Version,
             };
         }
     }
