@@ -16,7 +16,7 @@ public class ServiceFactory : WebApplicationFactory<Program>, IAsyncLifetime
     private readonly static string DORA_DB_CONNECTION_STRING =
         $"Host=localhost;Database=doratest;Username=postgres;Password={POSTGRES_PASSWORD};Port={POSTGRES_HOST_PORT}";
 
-    private readonly static string POSTGRES_CONNECTION_STRING =
+    private readonly static string POSTGRES_DB_CONNECTION_STRING =
         $"Host=localhost;Database=postgres;Username=postgres;Password={POSTGRES_PASSWORD};Port={POSTGRES_HOST_PORT}";
 
     async Task IAsyncLifetime.InitializeAsync()
@@ -28,12 +28,10 @@ public class ServiceFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {
         builder.ConfigureAppConfiguration((webBuilder, configBuilder) =>
         {
-            configBuilder.Sources.Clear();
-
             configBuilder.AddInMemoryCollection(new List<KeyValuePair<string, string?>>
             {
                 new KeyValuePair<string, string?>(
-                    "PostgresConnectionString" ,
+                    nameof(AppConfiguration.PostgresConnectionString),
                     DORA_DB_CONNECTION_STRING)
             });
         });
@@ -53,11 +51,11 @@ public class ServiceFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
         return new ContainerBuilder()
             .WithName(Guid.NewGuid().ToString("D"))
-            .WithImage("postgres:alpine3.17")
+            .WithImage("postgres:alpine3.19")
             .WithPortBinding(POSTGRES_HOST_PORT, POSTGRES_CONTAINER_PORT)
             .WithEnvironment("POSTGRES_PASSWORD", POSTGRES_PASSWORD)
             .WithWaitStrategy(Wait.ForUnixContainer()
-                .AddCustomWaitStrategy(new WaitDatabaseStrategy(POSTGRES_CONNECTION_STRING)))
+                .AddCustomWaitStrategy(new WaitDatabaseStrategy(POSTGRES_DB_CONNECTION_STRING)))
             .WithAutoRemove(true)
             .Build();
     }
