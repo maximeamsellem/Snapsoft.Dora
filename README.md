@@ -1,6 +1,6 @@
 # Purpose
 
-This application purpose is to collection data in order to report [DORA](https://dora.dev/) metrics.
+This application purpose is to collect data in order to report [DORA](https://dora.dev/) metrics in an organization.
 
 # Context
 
@@ -16,8 +16,8 @@ There would be a lot to improve:
   - Identify Entities, AggregateRoot, Bounded context
 - Security
   - It lacks at least authentication
-  - Executing database model changes from the WebAPi involve a powerful user which is not ideal
-  - Make sure exception are not thrown to the client
+  - Executing database model changes from the WebAPi involve a powerful database user which is not ideal
+  - Make sure exception details are not returned to the client
 - Maintenance
   - Log to a central place like datadog for example
   - Version APIs to anticipate future new API versions
@@ -44,7 +44,7 @@ To develop you will need:
 If you need to add database migrations, you will have to install `dotnet ef`.
 One way of doing it is to execute `dotnet tool install --global --version 7.0.11 dotnet-ef`.
 Be aware, that if you are using `dotnet ef` on other project on your machine it might cause trouble if it is with a different version.
-In that case you would better install it in the repository.
+In that case you would better install it next to your git repository.
 
 ## Postgres database
 
@@ -53,7 +53,7 @@ It is currently developed running on version [Postgres version 16](https://www.p
 You can either download it and install it. Or run it with docker.
 If you are using docker, you can run the `start-postgres.ps1` script at the root of the repository.
 
-If you are using this script. You have nothing else todo.
+If you are using this script. You have nothing else to do.
 
 If not, you will probably have to write a `.env` file with your own connection string.
 In that case you can inspire from the `.env.example` file.
@@ -67,8 +67,8 @@ If you want to run the tests locally you will need to install [Docker](https://w
 Assuming you have already a postgres database up and the right connection string.
 you just need to go to the root of the repository and execute:
 
-- with powershell : `cd .\src\Snapsoft.Dora.WebApi\ ; dotnet run`
-- with shell : `cd src/Snapsoft.Dora.WebApi && dotnet run`
+- powershell : `cd .\src\Snapsoft.Dora.WebApi\ ; dotnet run`
+- shell : `cd src/Snapsoft.Dora.WebApi && dotnet run`
 
 Then you can browse the [swagger page](http://localhost:5171/swagger/index.html) and play with it.
 
@@ -78,8 +78,8 @@ You can also start the application from your IDE.
 
 you just need to go the root of the repository and execute:
 
-- with powershell : `cd .\src\Snapsoft.Dora.WebApi.Integration.Test\ ; dotnet test`
-- with shell : `cd src/Snapsoft.Dora.WebApi.Integration.Test && dotnet test`
+- powershell : `cd .\src\Snapsoft.Dora.WebApi.Integration.Test\ ; dotnet test`
+- shell : `cd src/Snapsoft.Dora.WebApi.Integration.Test && dotnet test`
 
 # Testing manually
 
@@ -100,7 +100,7 @@ Url: http://localhost:5171/component
 }
 ```
 
-You should get a StatusCode = 201 with a body like
+You should get a 201 StatusCode with a body like
 
 ```json
 {
@@ -120,7 +120,7 @@ Method: GET
 Url: http://localhost:5171/component/{your_component_id}
 ```
 
-You should get a StatusCode = 200 with a body like
+You should get a 200 StatusCode with a body like
 
 ```json
 {
@@ -148,7 +148,7 @@ Url: http://localhost:5171/componentdeployment
 }
 ```
 
-You should get a StatusCode = 201 with a body like
+You should get a 201 StatusCode with a body like
 
 ```json
 {
@@ -170,7 +170,7 @@ Method: GET
 Url: http://localhost:5171/componentdeployment/{your_component_deployment_id}
 ```
 
-You should get a StatusCode = 200 with a body like
+You should get a 200 StatusCode with a body like
 
 ```json
 {
