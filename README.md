@@ -14,6 +14,7 @@ There would be a lot to improve:
 - Define a product roadmap based on which it would be possible to
   - Design API contracts to avoid breaking changes
   - Identify Entities, AggregateRoot, Bounded context
+- Provide a user interface
 - Security
   - It lacks at least authentication
   - Executing database model changes from the WebAPi involve a powerful database user which is not ideal
@@ -25,6 +26,10 @@ There would be a lot to improve:
   - Improve validations rules
 - Developer experience
   - Automate code formatting
+  - Provide a more detailed developer API documentation
+  - Use serilog request middleware to have shorter logs
+  - Use serilog colored console logging for better log parameter display
+  - Consider reducing IOC declaration by scanning assemblies
 - Tests
   - Some validation tests are missing
   - Ideally implement load tests
@@ -80,6 +85,12 @@ you just need to go the root of the repository and execute:
 
 - powershell : `cd .\src\Snapsoft.Dora.WebApi.Integration.Test\ ; dotnet test`
 - shell : `cd src/Snapsoft.Dora.WebApi.Integration.Test && dotnet test`
+
+# Create a database migration
+
+From the root of the repository, you can execute the powershell script like that: `.\add-migration.ps1 YourMigrationName`
+
+This script is just an helper you necessarily have to use it.
 
 # Testing manually
 
