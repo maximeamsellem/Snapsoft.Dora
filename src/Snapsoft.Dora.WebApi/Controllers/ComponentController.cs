@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Snapsoft.Dora.Domain.CommandsHandlers;
 using Snapsoft.Dora.Domain.Contracts.Commands;
-using Snapsoft.Dora.Domain.Contracts.Core.Commands;
 using Snapsoft.Dora.Domain.Contracts.Core.Storage;
 using Snapsoft.Dora.Domain.Contracts.Entities;
 using Snapsoft.Dora.WebApi;
