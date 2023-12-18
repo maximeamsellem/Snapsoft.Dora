@@ -1,13 +1,19 @@
+using DotNetEnv;
 using Snapsoft.Dora.Adapter.Postgres.Extensions;
 using Snapsoft.Dora.Domain.Extensions;
 using Snapsoft.Dora.WebApi;
 using Snapsoft.Dora.WebApi.HosterServices;
+
+#if DEBUG
+    Env.Load("../../.env");
+#endif
 
 var host = Host.CreateDefaultBuilder(args);
 
 host
     .ConfigureWebHostDefaults(x =>
     {
+        x.ConfigureAppConfiguration(ConfigureAppConfiguration);
         x.ConfigureServices(ConfigureServices);
         x.Configure(ConfigureHttpPipeline);
     });
@@ -40,7 +46,8 @@ static void ConfigureServices(
         .AddControllers()
         .AddJsonOptions(jsonOption =>
         {
-            jsonOption.JsonSerializerOptions.WriteIndented = !webHostBuilderContext.HostingEnvironment.IsProduction();
+            jsonOption.JsonSerializerOptions.WriteIndented = 
+                !webHostBuilderContext.HostingEnvironment.IsProduction();
         });
 }
 
@@ -60,6 +67,13 @@ static void ConfigureHttpPipeline(
         .UseAuthorization();
 
     app.UseEndpoints(endpoints => endpoints.MapControllers());
+}
+
+static void ConfigureAppConfiguration(
+    WebHostBuilderContext _,
+    IConfigurationBuilder configurationBuilder)
+{
+    configurationBuilder.AddEnvironmentVariables();
 }
 
 public partial class Program { }

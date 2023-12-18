@@ -16,6 +16,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{068B13AB-D325-4B96-B150-F4E873570DFC}"
 	ProjectSection(SolutionItems) = preProject
 		add-migration.ps1 = add-migration.ps1
+		start-postgres.ps1 = start-postgres.ps1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ci", "ci", "{DFDF5099-60FE-44EF-9983-03E6DEC85D2C}"
@@ -23,7 +24,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ci", "ci", "{DFDF5099-60FE-
 		.github\workflows\test.yml = .github\workflows\test.yml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Snapsoft.Dora.Domain.Read.Contracts", "Snapsoft.Dora.Domain.Read.Contracts\Snapsoft.Dora.Domain.Read.Contracts.csproj", "{4BAAAB16-17BD-4100-940A-7A42398478FC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Snapsoft.Dora.Domain.Read.Contracts", "Snapsoft.Dora.Domain.Read.Contracts\Snapsoft.Dora.Domain.Read.Contracts.csproj", "{4BAAAB16-17BD-4100-940A-7A42398478FC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
